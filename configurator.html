@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Athens Delivery – Preferences</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:40px;background:#f7f7f7}
+    h1{color:#2c3e50}
+    label{display:block;margin:15px 0 5px;font-weight:bold}
+    select{width:220px;padding:8px;font-size:16px}
+    button{margin-top:25px;padding:10px 20px;font-size:18px;background:#27ae60;color:#fff;border:0;border-radius:4px;cursor:pointer}
+    button:hover{background:#219653}
+  </style>
+</head>
+<body>
+  <h1>Tell us what you accept</h1>
+  <form id="prefForm">
+    <label>Max delivery fee you would pay (€)</label>
+    <select name="maxFee">
+      <option value="0">0</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+    </select>
+
+    <label>Max walking distance to pick-up (m)</label>
+    <select name="maxWalk">
+      <option value="0">0</option>
+      <option value="100">100</option>
+      <option value="250">250</option>
+      <option value="500">500</option>
+    </select>
+
+    <label>Minimum CO₂ saving vs van delivery (%)</label>
+    <select name="minCO2">
+      <option value="0">0</option>
+      <option value="20">20</option>
+      <option value="40">40</option>
+      <option value="55">55</option>
+    </select>
+
+    <label>Latest delivery day</label>
+    <select name="maxDay">
+      <option value="0">Same day</option>
+      <option value="1">Next day</option>
+      <option value="2">2-3 days</option>
+    </select>
+
+    <label>Pick-up mode you would use</label>
+    <select name="mode">
+      <option value="1">Locker only</option>
+      <option value="2">Mobile depot only</option>
+      <option value="3">Either</option>
+    </select>
+
+    <button type="submit">Continue →</button>
+  </form>
+
+  <script>
+    document.getElementById('prefForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const prefs = Object.fromEntries(new FormData(e.target).entries());
+      localStorage.setItem('prefs', JSON.stringify(prefs));
+      window.location = 'choice.html';   // your existing card page
+    });
+  </script>
+</body>
+</html>
