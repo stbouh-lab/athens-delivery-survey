@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Athens Pilot - Adaptive SP Survey</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .phase {
+            display: none;
+        }
+        
+        .phase.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .configurator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .config-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .config-item:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        .config-item label {
+            display: block;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .config-item select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        .config-item select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .choice-set {
+            margin-bottom: 40px;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .choice-set h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        
+        .alternatives {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .alternative {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .alternative:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        
+        .alternative.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .alternative h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .attribute {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .attribute strong {
+            color: #2c3e50;
+            display: inline-block;
+            width: 120px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+        
+        .badge-green {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-blue {
+            background: #cce5ff;
+            color: #004085;
+        }
+        
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            margin-left: 10px;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s ease;
+        }
+        
+        .instruction {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid #0066cc;
+        }
+        
+        .instruction p {
+            color: #004085;
+            line-height: 1.6;
+        }
+        
+        .opt-out {
+            text-align: center;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .opt-out:hover {
+            border-color: #ffc107;
+        }
+        
+        .opt-out.selected {
+            background: #fff8dc;
+            border-color: #ffc107;
+        }
+        
+        .summary {
+            background: #d4edda;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .summary h2 {
+            color: #155724;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚚 Athens Last-Mile Delivery Survey</h1>
+            <p>Help us design sustainable urban logistics solutions</p>
+        </div>
+        
+        <div class="content">
+            <!-- Phase 1: Configurator -->
+            <div id="phase1" class="phase active">
+                <h2 style="color: #2c3e50; margin-bottom: 20px;">Step 1: Design Your Ideal Delivery Service</h2>
+                
+                <div class="instruction">
+                    <p>Please select your preferred delivery service characteristics. This helps us personalize the following questions.</p>
+                </div>
+                
+                <div class="configurator-grid">
+                    <div class="config-item">
+                        <label>🏠 Delivery Method</label>
+                        <select id="config_mode">
+                            <option value="Home">Home Delivery</option>
+                            <option value="Locker">Smart Locker</option>
+                            <option value="Depot">Pick-up Point</option>
+                        </select>
+                    </div>
+                    
+                    <div class="config-item">
+                        <label>💰 Delivery Cost</label>
+                        <select id="config_cost">
+                            <option value="3">€3 (Economy)</option>
+                            <option value="5" selected>€5 (Standard)</option>
+                            <option value="7">€7 (Premium)</option>
+                            <option value="9">€9 (Express)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="config-item">
+                        <label>⏰ Time Window</label>
+                        <select id="config_time">
+                            <option value="1">1-hour window</option>
+                            <option value="2" selected>2-hour window</option>
+                            <option value="4">4-hour window</option>
+                            <option value="24">24h access (locker)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="config-item">
+                        <label>⚡ Delivery Speed</label>
+                        <select id="config_speed">
+                            <option value="Same">Same-day</option>
+                            <option value="Next" selected>Next-day</option>
+                            <option value="2-3days">2-3 days</option>
+                        </select>
+                    </div>
+                    
+                    <div class="config-item">
+                        <label>🔄 Flexibility</label>
+                        <select id="config_flex">
+                            <option value="None">No changes</option>
+                            <option value="2h" selected>Change until 2h before</option>
+                            <option value="Anytime">Change anytime</option>
+                        </select>
+                    </div>
+                    
+                    <div class="config-item">
+                        <label>🌱 Environmental</label>
+                        <select id="config_env">
+                            <option value="Standard">Standard vehicle</option>
+                            <option value="CO2neutral" selected>CO₂-neutral (electric)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="startChoiceExperiment()">
+                    Continue to Choice Questions →
+                </button>
+            </div>
+            
+            <!-- Phase 2: Choice Experiment -->
+            <div id="phase2" class="phase">
+                <h2 style="color: #2c3e50; margin-bottom: 10px;">Step 2: Choice Questions</h2>
+                <p style="color: #666; margin-bottom: 20px;">Question <span id="currentQ">1</span> of 8</p>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar" style="width: 12.5%"></div>
+                </div>
+                
+                <div id="choiceContainer"></div>
+                
+                <div style="margin-top: 30px;">
+                    <button class="btn btn-secondary" onclick="previousChoice()" id="prevBtn" disabled>
+                        ← Previous
+                    </button>
+                    <button class="btn btn-primary" onclick="nextChoice()" id="nextBtn" disabled>
+                        Next →
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Phase 3: Thank You -->
+            <div id="phase3" class="phase">
+                <div class="summary">
+                    <h2>🎉 Thank You!</h2>
+                    <p style="color: #155724; margin-top: 15px; font-size: 16px;">
+                        Your responses have been recorded. You've helped us design better sustainable delivery services for Athens!
+                    </p>
+                    <p style="margin-top: 20px; font-size: 14px; color: #666;">
+                        Response ID: <strong id="responseId"></strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Survey state
+        let configuratorChoice = {};
+        let choiceSets = [];
+        let currentChoiceSet = 0;
+        let responses = [];
+        
+        // Bayesian prior parameters
+        const priorMeans = {
+            cost: -0.15,
+            mode_locker: -0.3,
+            mode_depot: -0.5,
+            time_1h: 0.4,
+            time_2h: 0.2,
+            speed_same: 0.6,
+            speed_next: 0.3,
+            flex_2h: 0.3,
+            flex_anytime: 0.5,
+            env_co2: 0.3
+        };
+        
+        // Start choice experiment
+        function startChoiceExperiment() {
+            // Get configurator choices
+            configuratorChoice = {
+                mode: document.getElementById('config_mode').value,
+                cost: parseInt(document.getElementById('config_cost').value),
+                time_window: parseInt(document.getElementById('config_time').value),
+                speed: document.getElementById('config_speed').value,
+                flexibility: document.getElementById('config_flex').value,
+                environmental: document.getElementById('config_env').value
+            };
+            
+            // Generate adaptive choice sets
+            choiceSets = generateAdaptiveChoiceSets(configuratorChoice);
+            
+            // Show phase 2
+            document.getElementById('phase1').classList.remove('active');
+            document.getElementById('phase2').classList.add('active');
+            
+            // Display first choice set
+            displayChoiceSet(0);
+        }
+        
+        // Generate adaptive choice sets based on configurator
+        function generateAdaptiveChoiceSets(config) {
+            const sets = [];
+            const attributes = {
+                mode: ['Home', 'Locker', 'Depot'],
+                cost: [3, 5, 7, 9],
+                time_window: [1, 2, 4, 24],
+                speed: ['Same', 'Next', '2-3days'],
+                flexibility: ['None', '2h', 'Anytime'],
+                environmental: ['Standard', 'CO2neutral']
+            };
+            
+            // Generate 8 choice sets with strategic variation
+            for (let i = 0; i < 8; i++) {
+                const alternatives = [];
+                
+                // Alternative A: Similar to configurator
+                alternatives.push({
+                    mode: config.mode,
+                    cost: config.cost,
+                    time_window: config.time_window,
+                    speed: config.speed,
+                    flexibility: config.flexibility,
+                    environmental: config.environmental
+                });
+                
+                // Alternative B: Varied attributes
+                alternatives.push({
+                    mode: sample(attributes.mode.filter(m => m !== config.mode)),
+                    cost: sample(attributes.cost),
+                    time_window: sample(attributes.time_window),
+                    speed: sample(attributes.speed),
+                    flexibility: sample(attributes.flexibility),
+                    environmental: sample(attributes.environmental)
+                });
+                
+                // Alternative C: Different variation
+                alternatives.push({
+                    mode: sample(attributes.mode),
+                    cost: sample(attributes.cost.filter(c => c !== config.cost)),
+                    time_window: sample(attributes.time_window.filter(t => t !== config.time_window)),
+                    speed: sample(attributes.speed.filter(s => s !== config.speed)),
+                    flexibility: sample(attributes.flexibility),
+                    environmental: config.environmental === 'CO2neutral' ? 'Standard' : 'CO2neutral'
+                });
+                
+                sets.push(alternatives);
+            }
+            
+            return sets;
+        }
+        
+        // Helper: random sample
+        function sample(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+        
+        // Display choice set
+        function displayChoiceSet(index) {
+            currentChoiceSet = index;
+            const choiceSet = choiceSets[index];
+            
+            let html = `
+                <div class="choice-set">
+                    <h3>Which delivery option would you choose?</h3>
+                    <div class="alternatives">
+            `;
+            
+            choiceSet.forEach((alt, i) => {
+                html += `
+                    <div class="alternative" onclick="selectAlternative(${i})">
+                        <h4>Option ${String.fromCharCode(65 + i)}</h4>
+                        <div class="attribute">
+                            <strong>Delivery:</strong> ${alt.mode}
+                        </div>
+                        <div class="attribute">
+                            <strong>Cost:</strong> €${alt.cost}
+                        </div>
+                        <div class="attribute">
+                            <strong>Time window:</strong> ${alt.time_window < 24 ? alt.time_window + 'h' : '24h access'}
+                        </div>
+                        <div class="attribute">
+                            <strong>Speed:</strong> ${alt.speed}
+                        </div>
+                        <div class="attribute">
+                            <strong>Flexibility:</strong> ${alt.flexibility}
+                        </div>
+                        <div class="attribute">
+                            <strong>Type:</strong> ${alt.environmental}
+                            ${alt.environmental === 'CO2neutral' ? '<span class="badge badge-green">♻️ Eco</span>' : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                    <div class="opt-out" onclick="selectOptOut()">
+                        ❌ None of these - I would not choose any option
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('choiceContainer').innerHTML = html;
+            document.getElementById('currentQ').textContent = index + 1;
+            document.getElementById('progressBar').style.width = ((index + 1) / 8 * 100) + '%';
+            
+            // Update buttons
+            document.getElementById('prevBtn').disabled = index === 0;
+            document.getElementById('nextBtn').disabled = true;
+        }
+        
+        // Select alternative
+        function selectAlternative(index) {
+            document.querySelectorAll('.alternative').forEach(el => el.classList.remove('selected'));
+            document.querySelector('.opt-out').classList.remove('selected');
+            document.querySelectorAll('.alternative')[index].classList.add('selected');
+            
+            responses[currentChoiceSet] = { choice: String.fromCharCode(65 + index) };
+            document.getElementById('nextBtn').disabled = false;
+        }
+        
+        // Select opt-out
+        function selectOptOut() {
+            document.querySelectorAll('.alternative').forEach(el => el.classList.remove('selected'));
+            document.querySelector('.opt-out').classList.add('selected');
+            
+            responses[currentChoiceSet] = { choice: 'None' };
+            document.getElementById('nextBtn').disabled = false;
+        }
+        
+        // Next choice
+        function nextChoice() {
+            if (currentChoiceSet < 7) {
+                displayChoiceSet(currentChoiceSet + 1);
+            } else {
+                finishSurvey();
+            }
+        }
+        
+        // Previous choice
+        function previousChoice() {
+            if (currentChoiceSet > 0) {
+                displayChoiceSet(currentChoiceSet - 1);
+            }
+        }
+        
+        // Finish survey
+        function finishSurvey() {
+            // Generate response ID
+            const responseId = 'ATH-' + Date.now().toString(36).toUpperCase();
+            
+            // Save data (in real implementation, send to server)
+            const surveyData = {
+                responseId: responseId,
+                timestamp: new Date().toISOString(),
+                configurator: configuratorChoice,
+                choices: responses,
+                choiceSets: choiceSets
+            };
+            
+            console.log('Survey data:', surveyData);
+            
+            // Show thank you page
+            document.getElementById('phase2').classList.remove('active');
+            document.getElementById('phase3').classList.add('active');
+            document.getElementById('responseId').textContent = responseId;
+            
+            // In real implementation: send to server
+            // fetch('/api/survey/submit', {
+            //     method: 'POST',
+            //     body: JSON.stringify(surveyData)
+            // });
+        }
+    </script>
+</body>
+</html>
