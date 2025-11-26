@@ -437,101 +437,44 @@
         }
         
         // Start choice experiment
-       function startChoiceExperiment() {
-    // Get configurator choices
-    configuratorChoice = {
-        mode: document.getElementById('config_mode').value,
-        cost: parseInt(document.getElementById('config_cost').value),
-        time_window: parseInt(document.getElementById('config_time').value),
-        speed: document.getElementById('config_speed').value,
-        flexibility: document.getElementById('config_flex').value,
-        environmental: document.getElementById('config_env').value
-    };
-    
-    // 1. capture limits from YOUR configurator (already exists)
-    const limits = {
-        maxFee  : parseInt(document.getElementById('config_cost').value),
-        maxWalk : parseInt(document.getElementById('config_time').value) === 24 ? 500 : parseInt(document.getElementById('config_time').value) * 50, // quick map
-        minCO2  : document.getElementById('config_env').value === 'CO2neutral' ? 40 : 0,
-        maxDay  : document.getElementById('config_speed').value === 'Same' ? 0 : document.getElementById('config_speed').value === 'Next' ? 1 : 2,
-        mode    : document.getElementById('config_mode').value === 'Locker' ? 1 : document.getElementById('config_mode').value === 'Depot' ? 2 : 3
-    };
-
-    // 2. pick the block that respects those limits
-    const hash = hashCode(JSON.stringify(limits));
-    const blockID = ((hash % 6) + 6) % 6 + 1;   // force positive 1-6
-    window.currentBlock = PERSONA_BLOCKS.filter(r => r.BlockID === blockID);
-
-    // 3. convert block rows → your internal format (6 sets × 3 alts)
-    choiceSets = blockToChoiceSets(window.currentBlock);
-
-    // 4. push persona ID for analytics
-    if(typeof gtag !== 'undefined') gtag('event','persona',{persona_id:blockID});
-    console.log('Persona block loaded:',blockID);
-    
-    // Show phase 2
-    document.getElementById('phase1').classList.remove('active');
-    document.getElementById('phase2').classList.add('active');
-    
-    // Display first choice set
-    displayChoiceSet(0);
-}
-        
-        // Generate adaptive choice sets based on configurator
-        function generateAdaptiveChoiceSets(config) {
-            const sets = [];
-            const attributes = {
-                mode: ['Home', 'Locker', 'Depot'],
-                cost: [3, 5, 7, 9],
-                time_window: [1, 2, 4, 24],
-                speed: ['Same', 'Next', '2-3days'],
-                flexibility: ['None', '2h', 'Anytime'],
-                environmental: ['Standard', 'CO2neutral']
+        function startChoiceExperiment() {
+            // Get configurator choices
+            configuratorChoice = {
+                mode: document.getElementById('config_mode').value,
+                cost: parseInt(document.getElementById('config_cost').value),
+                time_window: parseInt(document.getElementById('config_time').value),
+                speed: document.getElementById('config_speed').value,
+                flexibility: document.getElementById('config_flex').value,
+                environmental: document.getElementById('config_env').value
             };
             
-            // Generate 8 choice sets with strategic variation
-            for (let i = 0; i < 8; i++) {
-                const alternatives = [];
-                
-                // Alternative A: Similar to configurator
-                alternatives.push({
-                    mode: config.mode,
-                    cost: config.cost,
-                    time_window: config.time_window,
-                    speed: config.speed,
-                    flexibility: config.flexibility,
-                    environmental: config.environmental
-                });
-                
-                // Alternative B: Varied attributes
-                alternatives.push({
-                    mode: sample(attributes.mode.filter(m => m !== config.mode)),
-                    cost: sample(attributes.cost),
-                    time_window: sample(attributes.time_window),
-                    speed: sample(attributes.speed),
-                    flexibility: sample(attributes.flexibility),
-                    environmental: sample(attributes.environmental)
-                });
-                
-                // Alternative C: Different variation
-                alternatives.push({
-                    mode: sample(attributes.mode),
-                    cost: sample(attributes.cost.filter(c => c !== config.cost)),
-                    time_window: sample(attributes.time_window.filter(t => t !== config.time_window)),
-                    speed: sample(attributes.speed.filter(s => s !== config.speed)),
-                    flexibility: sample(attributes.flexibility),
-                    environmental: config.environmental === 'CO2neutral' ? 'Standard' : 'CO2neutral'
-                });
-                
-                sets.push(alternatives);
-            }
+            // 1. capture limits from YOUR configurator (already exists)
+            const limits = {
+                maxFee  : parseInt(document.getElementById('config_cost').value),
+                maxWalk : parseInt(document.getElementById('config_time').value) === 24 ? 500 : parseInt(document.getElementById('config_time').value) * 50, // quick map
+                minCO2  : document.getElementById('config_env').value === 'CO2neutral' ? 40 : 0,
+                maxDay  : document.getElementById('config_speed').value === 'Same' ? 0 : document.getElementById('config_speed').value === 'Next' ? 1 : 2,
+                mode    : document.getElementById('config_mode').value === 'Locker' ? 1 : document.getElementById('config_mode').value === 'Depot' ? 2 : 3
+            };
+
+            // 2. pick the block that respects those limits
+            const hash = hashCode(JSON.stringify(limits));
+            const blockID = ((hash % 6) + 6) % 6 + 1;   // force positive 1-6
+            window.currentBlock = PERSONA_BLOCKS.filter(r => r.BlockID === blockID);
+
+            // 3. convert block rows → your internal format (6 sets × 3 alts)
+            choiceSets = blockToChoiceSets(window.currentBlock);
+
+            // 4. push persona ID for analytics
+            if(typeof gtag !== 'undefined') gtag('event','persona',{persona_id:blockID});
+            console.log('Persona block loaded:',blockID);
             
-            return sets;
-        }
-        
-        // Helper: random sample
-        function sample(array) {
-            return array[Math.floor(Math.random() * array.length)];
+            // Show phase 2
+            document.getElementById('phase1').classList.remove('active');
+            document.getElementById('phase2').classList.add('active');
+            
+            // Display first choice set
+            displayChoiceSet(0);
         }
         
         // Display choice set
@@ -602,7 +545,7 @@
         // Select opt-out
         function selectOptOut() {
             document.querySelectorAll('.alternative').forEach(el => el.classList.remove('selected'));
-            document.querySelector('.opt-out').classList.add('selected');
+            document.querySelector('.opt-out').classList.remove('selected');
             
             responses[currentChoiceSet] = { choice: 'None' };
             document.getElementById('nextBtn').disabled = false;
