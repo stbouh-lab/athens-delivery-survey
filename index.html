@@ -7,7 +7,7 @@
 
     <!-- 1.  load persona data FIRST -->
     <script src="blocks/persona_blocks.js"></script>
-    
+
     <style>
         * {
             margin: 0;
@@ -413,25 +413,29 @@
             flex_anytime: 0.5,
             env_co2: 0.3
         };
+        
         // hash helper
-function hashCode(s){return s.split("").reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);}
+        function hashCode(s){
+            return s.split("").reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);
+        }
 
-// convert block rows → your format
-function blockToChoiceSets(blockRows){
-  const sets=[];
-  for(let s=1;s<=6;s++){
-    const alts=blockRows.filter(r=>r.Set===s);
-    sets.push(alts.map(r=>({
-      mode        : r.ModeFlag===0 ? 'Home' : r.ModeFlag===1 ? 'Locker' : 'Depot',
-      cost        : r.Cost,
-      time_window : r.Walk===0? 0 : r.Walk<=100? 1 : r.Walk<=250? 2 : 4,  // quick inverse map
-      speed       : r.DAY===0? 'Same' : r.DAY===1? 'Next' : '2-3days',
-      flexibility : r.Resched===0? 'None' : r.Resched===2? 'Anytime' : '2h',
-      environmental: r.CO2save===0? 'Standard' : 'CO2neutral'
-    })));
-  }
-  return sets;
-}
+        // convert block rows → your format
+        function blockToChoiceSets(blockRows){
+            const sets=[];
+            for(let s=1;s<=6;s++){
+                const alts=blockRows.filter(r=>r.Set===s);
+                sets.push(alts.map(r=>({
+                    mode        : r.ModeFlag===0 ? 'Home' : r.ModeFlag===1 ? 'Locker' : 'Depot',
+                    cost        : r.Cost,
+                    time_window : r.Walk===0? 0 : r.Walk<=100? 1 : r.Walk<=250? 2 : 4,  // quick inverse map
+                    speed       : r.DAY===0? 'Same' : r.DAY===1? 'Next' : '2-3days',
+                    flexibility : r.Resched===0? 'None' : r.Resched===2? 'Anytime' : '2h',
+                    environmental: r.CO2save===0? 'Standard' : 'CO2neutral'
+                })));
+            }
+            return sets;
+        }
+        
         // Start choice experiment
         function startChoiceExperiment() {
             // Get configurator choices
@@ -444,26 +448,25 @@ function blockToChoiceSets(blockRows){
                 environmental: document.getElementById('config_env').value
             };
             
-            // Generate adaptive choice sets
             // 1. capture limits from YOUR configurator (already exists)
-const limits = {
-  maxFee  : parseInt(document.getElementById('config_cost').value),
-  maxWalk : parseInt(document.getElementById('config_time').value) === 24 ? 500 : parseInt(document.getElementById('config_time').value) * 50, // quick map
-  minCO2  : document.getElementById('config_env').value === 'CO2neutral' ? 40 : 0,
-  maxDay  : document.getElementById('config_speed').value === 'Same' ? 0 : document.getElementById('config_speed').value === 'Next' ? 1 : 2,
-  mode    : document.getElementById('config_mode').value === 'Locker' ? 1 : document.getElementById('config_mode').value === 'Depot' ? 2 : 3
-};
+            const limits = {
+                maxFee  : parseInt(document.getElementById('config_cost').value),
+                maxWalk : parseInt(document.getElementById('config_time').value) === 24 ? 500 : parseInt(document.getElementById('config_time').value) * 50, // quick map
+                minCO2  : document.getElementById('config_env').value === 'CO2neutral' ? 40 : 0,
+                maxDay  : document.getElementById('config_speed').value === 'Same' ? 0 : document.getElementById('config_speed').value === 'Next' ? 1 : 2,
+                mode    : document.getElementById('config_mode').value === 'Locker' ? 1 : document.getElementById('config_mode').value === 'Depot' ? 2 : 3
+            };
 
-// 2. pick the block that respects those limits
-const blockID = (hashCode(JSON.stringify(limits)) % 6) + 1;   // 1-6
-window.currentBlock = PERSONA_BLOCKS.filter(r => r.BlockID === blockID);
+            // 2. pick the block that respects those limits
+            const blockID = (hashCode(JSON.stringify(limits)) % 6) + 1;   // 1-6
+            window.currentBlock = PERSONA_BLOCKS.filter(r => r.BlockID === blockID);
 
-// 3. convert block rows → your internal format (6 sets × 3 alts)
-choiceSets = blockToChoiceSets(window.currentBlock);
+            // 3. convert block rows → your internal format (6 sets × 3 alts)
+            choiceSets = blockToChoiceSets(window.currentBlock);
 
-// 4. push persona ID for analytics
-if(typeof gtag !== 'undefined') gtag('event','persona',{persona_id:blockID});
-console.log('Persona block loaded:',blockID);
+            // 4. push persona ID for analytics
+            if(typeof gtag !== 'undefined') gtag('event','persona',{persona_id:blockID});
+            console.log('Persona block loaded:',blockID);
             
             // Show phase 2
             document.getElementById('phase1').classList.remove('active');
