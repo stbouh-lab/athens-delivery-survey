@@ -459,7 +459,7 @@
 
             // 2. pick the block that respects those limits
             const hash = hashCode(JSON.stringify(limits));
-const blockID = ((hash % 6) + 6) % 6 + 1;   // force positive 1-6
+            const blockID = ((hash % 6) + 6) % 6 + 1;   // force positive 1-6
             window.currentBlock = PERSONA_BLOCKS.filter(r => r.BlockID === blockID);
 
             // 3. convert block rows → your internal format (6 sets × 3 alts)
